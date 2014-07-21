@@ -1,5 +1,5 @@
 /**
- * smooth-scroll v4.8.0
+ * smooth-scroll v4.8.2
  * Animate scrolling to anchor links, by Chris Ferdinandi.
  * http://github.com/cferdinandi/smooth-scroll
  * 
@@ -25,13 +25,14 @@
 
 	var exports = {}; // Object for public APIs
 	var supports = !!document.querySelector && !!root.addEventListener; // Feature test
+	var settings;
 
 	// Default settings
 	var defaults = {
 		speed: 500,
 		easing: 'easeInOutCubic',
 		offset: 0,
-		updateURL: false,
+		updateURL: true,
 		callbackBefore: function () {},
 		callbackAfter: function () {}
 	};
@@ -40,22 +41,6 @@
 	//
 	// Methods
 	//
-
-	/**
-	 * Merge defaults with user options
-	 * @private
-	 * @param {Object} defaults Default settings
-	 * @param {Object} options User options
-	 * @returns {Object} Merged values of defaults and options
-	 */
-	var extend = function ( defaults, options ) {
-		for ( var key in options ) {
-			if (Object.prototype.hasOwnProperty.call(options, key)) {
-				defaults[key] = options[key];
-			}
-		}
-		return defaults;
-	};
 
 	/**
 	 * A simple forEach() implementation for Arrays, Objects and NodeLists
@@ -76,6 +61,24 @@
 				callback.call(scope, collection[i], i, collection);
 			}
 		}
+	};
+
+	/**
+	 * Merge defaults with user options
+	 * @private
+	 * @param {Object} defaults Default settings
+	 * @param {Object} options User options
+	 * @returns {Object} Merged values of defaults and options
+	 */
+	var extend = function ( defaults, options ) {
+		var extended = {};
+		forEach(defaults, function (value, prop) {
+			extended[prop] = defaults[prop];
+		});
+		forEach(options, function (value, prop) {
+			extended[prop] = options[prop];
+		});
+		return extended;
 	};
 
 	/**
@@ -152,19 +155,7 @@
 	 * @returns {Object}
 	 */
 	var getDataOptions = function ( options ) {
-		var settings = {};
-		// Create a key/value pair for each setting
-		if ( options ) {
-			options = options.split(';');
-			options.forEach( function(option) {
-				option = trim(option);
-				if ( option !== '' ) {
-					option = option.split(':');
-					settings[option[0]] = trim(option[1]);
-				}
-			});
-		}
-		return settings;
+		return !options || !(typeof JSON === 'object' && typeof JSON.parse === 'function') ? {} : JSON.parse( options );
 	};
 
 	/**
@@ -177,7 +168,7 @@
 		if ( history.pushState && (url || url === 'true') ) {
 			history.pushState( {
 				pos: anchor.id
-			}, '', anchor );
+			}, '', window.location.pathname + anchor );
 		}
 	};
 
@@ -192,7 +183,7 @@
 	exports.animateScroll = function ( toggle, anchor, options, event ) {
 
 		// Options and overrides
-		var settings = extend( defaults, options || {} ); // Merge user options with defaults
+		var settings = extend( settings || defaults, options || {} );  // Merge user options with defaults
 		var overrides = getDataOptions( toggle ? toggle.getAttribute('data-options') : null );
 		settings = extend( settings, overrides );
 
@@ -276,12 +267,12 @@
 		if ( !supports ) return;
 
 		// Selectors and variables
-		var settings = extend( defaults, options || {} ); // Merge user options with defaults
+		settings = extend( defaults, options || {} ); // Merge user options with defaults
 		var toggles = document.querySelectorAll('[data-scroll]'); // Get smooth scroll toggles
 
 		// When a toggle is clicked, run the click handler
 		forEach(toggles, function (toggle) {
-			toggle.addEventListener('click', exports.animateScroll.bind( null, toggle, toggle.getAttribute('href'), settings ), false);
+			toggle.addEventListener('click', exports.animateScroll.bind( null, toggle, toggle.hash, settings ), false);
 		});
 
 	};
