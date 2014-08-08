@@ -1,5 +1,5 @@
 /**
- * smooth-scroll v5.0.0
+ * smooth-scroll v5.0.1
  * Animate scrolling to anchor links, by Chris Ferdinandi.
  * http://github.com/cferdinandi/smooth-scroll
  * 
@@ -136,16 +136,6 @@
 			document.body.offsetHeight, document.documentElement.offsetHeight,
 			document.body.clientHeight, document.documentElement.clientHeight
 		);
-	};
-
-	/**
-	 * Remove whitespace from a string
-	 * @private
-	 * @param {String} string
-	 * @returns {String}
-	 */
-	var trim = function ( string ) {
-		return string.replace(/^\s+|\s+$/g, '');
 	};
 
 	/**
